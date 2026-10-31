@@ -8,6 +8,7 @@ flask = "*"
 requests = "*"
 streamlit = "*"
 openai = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

@@ -1,16 +1,7 @@
-FROM python:3.13-alpine
-
-COPY api.py Pipfile Pipfile.lock ./app/
-
+FROM python:3.13-slim
 WORKDIR /app
-
-RUN pip3 install -U pip && \
-    pip3 install pipenv && \
-    pip3 install pexpect && \
-    pipenv install --system --deploy --ignore-pipfile
-
-ENTRYPOINT [ "python" ]
-
+RUN pip install --no-cache-dir flask openai python-dotenv gunicorn
+COPY api.py /app/api.py
+ENV PORT=5001 FLASK_HOST=0.0.0.0
 EXPOSE 5001
-
-CMD ["api.py" ]
+CMD ["gunicorn", "--bind", "0.0.0.0:5001", "--workers", "2", "--timeout", "150", "api:app"]

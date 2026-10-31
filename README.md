@@ -1,44 +1,63 @@
-# DT1 2026 : Enabling Technologies, Assignment 1
+# DT1 2026 — AI Assistant
 
-The assignment description and requirements are on Moodle.
+## Author and accounts
+- Student: Abdoul Ahly NOUHOUM SATAROU
+- GitHub username: ahlyari
+- Docker Hub username: abdoulnouhouhoum
 
-## Introduction
-The small flask application presented here is a proxy that we use to interact with OpenRouter API.
-Your job is to deploy and interact with OpenRouter API using this proxy. The interface will be built
-using Streamlit. </br></br>
-This assignment covers the first 3 learning cycles:
-- Software Architecture
-- API Design
-- Cloud Computing
+## Overview
+Streamlit browser UI sends a POST JSON request to Flask (`/chat`). Flask sends a chat completion request to OpenRouter using a secret API key from its environment. OpenRouter returns text to Flask; Flask returns JSON `{ "ack": "..." }` to Streamlit.
 
-Different aspects of the assignment covers all the three cycles. Please go back to the lecture materials
-in case there is something you don't understand. In addition, we provide materials here that we believe
-will act as hints for successfully completing the assignment.
+## Architecture
+```mermaid
+flowchart LR
+  U[Browser / User] -->|HTTP :8501| S[Streamlit frontend]
+  S -->|POST /chat on Docker network| F[Flask API :5001]
+  F -->|HTTPS / chat completions| O[OpenRouter model]
+  O --> F --> S --> U
+```
 
-**NOTE: The code has been developed and tested on Ubuntu (Debian)/MacOS. You will be using Ubuntu on the Google 
-Cloud Platform. For local testing, you might need to find the appropriate information and corresponding adjustments.**
+## API design
+- `GET /ping` returns `{"ack":"pong"}`.
+- `POST /chat` accepts JSON `{"input":"What is cloud computing?", "model_id":"nvidia/nemotron-3-ultra-550b-a55b:free"}` and returns `{"ack":"model response"}`.
+- HTTP 400: malformed or missing prompt; 500: API key missing; 502: upstream OpenRouter failure.
+- The secret API key is never sent from frontend to backend in a URL. Flask obtains it as an environment variable.
 
-## Codebase
-- api.py: contains all the code for the api layer including the API routes
-- frontend.py: the user interface that you that users can interact with
-- Pipfile, Pipfile.lock: dependency file for running the codebase
-- 2 Dockerfiles: docker build configuration for the api and frontend
-- compose.yaml: docker compose file to start and stop docker images
-- .env_example: the environment variables you will need in the .env file you should create locally (compose.yaml expects this)
+## Local execution on Windows
+In project directory, create `.env` from `.env_example` and insert your own API key. Never commit `.env`.
+- Terminal 1: `py -3.13 -m pipenv run python api.py`
+- Terminal 2: `py -3.13 -m pipenv run python -m streamlit run frontend.py`
+- Open http://127.0.0.1:8501, ask a question, click Send.
 
-## Supplementary Materials
-### Software Architecture
-- You can use TLDraw for diagramming: https://www.tldraw.com/ [you can use any other tool if you prefer, like LucidCharts, Miro etc.]
-### Streamlit
-Here is something to get you started: https://dev.to/niveshbansal07/streamlit-beginner-guide-with-examples-317d
-### API Design
-- Curl for testing your docker container locally: https://daniel.haxx.se/blog/2021/05/31/curl-localhost-as-a-local-host/
-### Cloud Computing
-- Installing Docker on Debian: https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-debian-10
-- You can use ```sudo passwd``` to set the password once you login to your GCP VM.
-- Dockerize your application: https://docs.docker.com/get-started/02_our_app/
-- Run Dockerfile: https://www.datacamp.com/tutorial/run-a-docker-image
-- Docker image to Docker Hub: https://docs.docker.com/get-started/04_sharing_app/
-- Firewall Rules on GCP: https://www.howtogeek.com/devops/how-to-open-firewall-ports-on-a-gcp-compute-engine-instance/
-- In case you would like to work using your local terminal: https://cloud.google.com/sdk/docs/install-sdk#linux
-- Docker Compose: https://betterstack.com/community/guides/scaling-docker/docker-compose-getting-started/
+## Docker Compose
+- `docker compose config --quiet`
+- `docker compose up --build -d`
+- `docker compose ps`
+- Open http://localhost:8501
+- `docker compose logs --tail 100 api`
+- `docker compose down`
+
+## Docker Hub
+After creating a private repository for dt1-api and a public repository for dt1-frontend:
+- Set `DOCKERHUB_USERNAME` in `.env`, then `docker compose build`
+- `docker login`
+- `docker compose push`
+- For GCP, the VM must authenticate to Docker Hub to pull the private API image.
+
+## Google Cloud deployment
+Create an Ubuntu VM in Compute Engine. Check billing eligibility and VM costs. Install Docker Engine and Compose plugin from official Docker instructions. Copy only the deployment configuration and `.env` securely onto the VM. Docker login on the VM for the private API image, then `docker compose pull` and `docker compose up -d --no-build`.
+Use ingress firewall restrictions to permit TCP/8501 only from your trusted public IP/CIDR and the instructor-provided CIDR. Do not publicly open TCP/5001; it is Docker-internal only. Confirm instructor access and document the rule.
+
+## Testing and limitations
+- `curl http://127.0.0.1:5001/ping` when running locally.
+- Ask an AI question in Streamlit and verify visible response.
+- Free OpenRouter models may be unavailable, rate-limited or subject to account restrictions; inspect errors.
+- Deployment does not include authentication inside Streamlit, a database, observability, or high availability. Firewall IP-based restrictions are the primary access control.
+
+## Evidence of deliverable
+- REPLACE: GCP VM name/region (never publish credentials)
+- REPLACE: screenshot / output of `docker compose ps`
+- REPLACE: screenshot of Streamlit responding
+- REPLACE: firewall rules and allowed CIDRs (no secrets)
+- REPLACE: GitHub repo link and Docker Hub repo names
+- REPLACE: professor collaborator sid027 invited and accepted/pending

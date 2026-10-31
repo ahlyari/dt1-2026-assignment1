@@ -1,16 +1,25 @@
-version: "3.9"
-
 services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    image: ${DOCKERHUB_USERNAME:-dt1local}/dt1-api:latest
+    environment:
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:?Set OPENROUTER_API_KEY in .env}
+      FLASK_HOST: 0.0.0.0
+      PORT: 5001
+    expose:
+      - "5001"
+    restart: unless-stopped
   frontend:
-    image: dt1_frontend:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    image: ${DOCKERHUB_USERNAME:-dt1local}/dt1-frontend:latest
+    environment:
+      BASE_URL: http://api:5001
     ports:
       - "8501:8501"
     depends_on:
       - api
-    env_file:
-      - .env
-
-  api:
-    image: dt1_api:latest
-    ports:
-      - "5001:5001"
+    restart: unless-stopped
