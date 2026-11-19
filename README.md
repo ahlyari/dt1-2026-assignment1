@@ -8,6 +8,19 @@
 ## Overview
 Streamlit browser UI sends a POST JSON request to Flask (`/chat`). Flask sends a chat completion request to OpenRouter using a secret API key from its environment. OpenRouter returns text to Flask; Flask returns JSON `{ "ack": "..." }` to Streamlit.
 
+## Live Application
+
+The AI Assistant is deployed on Google Cloud and is accessible at:
+
+**Application URL:** http://34.55.141.134:8501
+
+- Platform: Google Cloud Compute Engine
+- VM: dt1-2026-ubuntu
+- Frontend: Streamlit
+- Backend: Flask
+- Public port: 8501
+  
+
 ## Architecture
 ```mermaid
 flowchart LR
@@ -27,7 +40,7 @@ flowchart LR
 In project directory, create `.env` from `.env_example` and insert your own API key. Never commit `.env`.
 - Terminal 1: `py -3.13 -m pipenv run python api.py`
 - Terminal 2: `py -3.13 -m pipenv run python -m streamlit run frontend.py`
-- Open http://127.0.0.1:8501, ask a question, click Send.
+- Open : http://34.55.141.134:8501, ask a question, click Send.
 
 ## Docker Compose
 - `docker compose config --quiet`
