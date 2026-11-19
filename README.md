@@ -12,7 +12,7 @@ Streamlit browser UI sends a POST JSON request to Flask (`/chat`). Flask sends a
 
 The AI Assistant is deployed on Google Cloud and is accessible at:
 
-**Application URL:** http://34.55.141.134:8501
+**Application URL:**  Open: http://localhost:8501, ask a question, click Send.
 
 - Platform: Google Cloud Compute Engine
 - VM: dt1-2026-ubuntu
