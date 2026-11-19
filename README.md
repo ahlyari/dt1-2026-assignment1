@@ -59,6 +59,14 @@ After creating a private repository for dt1-api and a public repository for dt1-
 
 ## Google Cloud deployment
 Create an Ubuntu VM in Compute Engine. Check billing eligibility and VM costs. Install Docker Engine and Compose plugin from official Docker instructions. Copy only the deployment configuration and `.env` securely onto the VM. Docker login on the VM for the private API image, then `docker compose pull` and `docker compose up -d --no-build`.
+
+
+For instructor evaluation, TCP port 8501 is temporarily accessible from the Internet through the Google Cloud firewall rule `allow-dt1-streamlit-8501`. The Flask backend on port 5001 is not publicly exposed.
+
+Live application: http://34.55.141.134:8501
+
+Public access will be restricted again after the evaluation.
+
 Use ingress firewall restrictions to permit TCP/8501 only from your trusted public IP/CIDR and the instructor-provided CIDR. Do not publicly open TCP/5001; it is Docker-internal only. Confirm instructor access and document the rule.
 
 ## Testing and limitations
